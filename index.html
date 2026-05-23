@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sobral — Lugares de Memória</title>
+  <meta name="description"
+    content="Uma jornada pelo tempo e espaço urbano de Sobral-CE, resgatando memórias afetivas dos idosos nos espaços públicos da cidade." />
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-bold-rounded/css/uicons-bold-rounded.css" />
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    /* ══════════════════════════════════════════════════
+       SOBRAL EM IMAGENS — novos componentes
+       (complementa o style.css principal)
+       ══════════════════════════════════════════════════ */
+
+    /* ── Intro: metodologia + casal ── */
+    .gallery-intro {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 28px;
+      padding: 36px 40px;
+      margin-top: 48px;
+      margin-bottom: 40px;
+      position: relative;
+      z-index: 1;
+    }
+    .gallery-intro-text {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .gallery-intro-text p {
+      color: var(--text-secondary);
+      line-height: 1.9;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+    .gallery-intro-text p:last-child { margin-bottom: 0; }
+    .gallery-intro-text strong { color: var(--text-primary); font-weight: 800; }
+
+    /* ── Card de fala do casal ── */
+    .gallery-couple-quote {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 26px 28px;
+      border-radius: var(--radius-md, 22px);
+      background: var(--glass-bg);
+      border: 1.5px solid var(--glass-border);
+      border-left: 3px solid var(--rose);
+      position: relative;
+      z-index: 1;
+    }
+    .couple-avatars {
+      display: flex;
+      align-items: center;
+    }
+    .couple-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 800;
+      color: white;
+      flex-shrink: 0;
+      font-family: 'Playfair Display', 'Fraunces', serif;
+    }
+    .couple-avatar--l {
+      background: linear-gradient(135deg, var(--teal), var(--lavender));
+      z-index: 2;
+    }
+    .couple-avatar--s {
+      background: linear-gradient(135deg, var(--rose), var(--amber));
+      margin-left: -11px;
+      border: 2.5px solid var(--bg-primary);
+      z-index: 1;
+    }
+    .gallery-couple-quote p {
+      font-style: italic;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.9;
+      font-size: 0.96rem;
+    }
+    .gallery-couple-quote cite {
+      font-style: normal;
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--rose);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      display: block;
+    }
+
+    @media (max-width: 800px) {
+      .gallery-intro {
+        grid-template-columns: 1fr;
+        padding: 24px 22px;
+        margin-bottom: 28px;
+      }
+    }
+
+    /* ══════════════════════════════════════════════════
+       MARQUEE — flex, proporções exatas
+         .horiz  →  3:2  landscape  (360 × 240 px)
+         .vert   →  2:3  portrait   (240 × 360 px)
+       As fotos são alinhadas pela base (flex-end),
+       criando um ritmo visual entre altas e largas.
+       ══════════════════════════════════════════════════ */
+    .gallery-marquee-wrap {
+      display: flex;
+      overflow: hidden;
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      padding: 10px 0 18px;
+    }
+
+    .marquee-track {
+      display: flex !important;
+      /* zera qualquer herança de grid */
+      grid-template-rows: unset !important;
+      grid-auto-columns: unset !important;
+      grid-auto-flow: unset !important;
+      flex-shrink: 0;
+      align-items: flex-end;
+      gap: 16px;
+      padding: 0 8px;
+      animation: scroll-left 60s linear infinite;
+    }
+    .gallery-marquee-wrap:hover .marquee-track {
+      animation-play-state: paused;
+    }
+
+    /* Reset de qualquer grid-row herdado do .tall anterior */
+    .gal {
+      flex-shrink: 0 !important;
+      position: relative;
+      border-radius: var(--radius-md, 22px);
+      overflow: hidden;
+      border: 1.5px solid var(--glass-border);
+      grid-row: unset !important;
+      grid-column: unset !important;
+    }
+
+    /* 3:2 paisagem — 360 × 240 */
+    .gal.horiz {
+      width: 360px;
+      height: 240px;
+    }
+    /* 2:3 retrato — 240 × 360 */
+    .gal.vert {
+      width: 240px;
+      height: 360px;
+    }
+
+    .gal img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s ease;
+    }
+    .gal:hover img { transform: scale(1.07); }
+
+    .gal-over {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.52) 0%, transparent 55%);
+      opacity: 0;
+      transition: opacity 0.32s ease;
+    }
+    .gal:hover .gal-over { opacity: 1; }
+
+    .gal-cap {
+      position: absolute;
+      bottom: 13px; left: 13px; right: 13px;
+      color: white;
+      font-size: 0.78rem;
+      font-weight: 700;
+      font-family: 'Playfair Display', 'Fraunces', serif;
+      font-style: italic;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.32s ease, transform 0.32s ease;
+      pointer-events: none;
+    }
+    .gal:hover .gal-cap { opacity: 1; transform: translateY(0); }
+
+    /* Badge de época nas fotos históricas */
+    .gal-era {
+      position: absolute;
+      top: 10px; left: 10px;
+      background: rgba(0, 0, 0, 0.58);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: rgba(255, 218, 148, 0.96);
+      font-size: 0.58rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 999px;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Mobile */
+    @media (max-width: 600px) {
+      .gal.horiz { width: 252px; height: 168px; }
+      .gal.vert  { width: 168px; height: 252px; }
+      .marquee-track { gap: 12px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <canvas id="xmb-canvas" aria-hidden="true"></canvas>
+
+  <!-- ═══ NAV ═══ -->
+       <!--
+  <nav class="nav-bar" role="navigation" aria-label="Navegação principal">
+    <a href="#hero" class="nav-logo">Sobral Memória</a>
+    <div class="nav-links">
+      <a href="#metodologia" class="nav-link"><i class="fi fi-br-document"
+          aria-hidden="true"></i><span>Projeto</span></a>
+      <a href="#sobre" class="nav-link active"><i class="fi fi-br-globe" aria-hidden="true"></i><span>A
+          Cidade</span></a>
+      <a href="#lugares" class="nav-link"><i class="fi fi-br-marker" aria-hidden="true"></i><span>Lugares</span></a>
+      <a href="#vozes" class="nav-link"><i class="fi fi-br-users" aria-hidden="true"></i><span>Vozes</span></a>
+      <a href="#galeria" class="nav-link"><i class="fi fi-br-picture" aria-hidden="true"></i><span>Fotos</span></a>
+    </div>
+    <button id="theme-btn" class="theme-toggle" onclick="toggleTheme()" aria-label="Alternar modo claro/escuro"
+      type="button">
+      <i class="fi fi-br-moon"></i>
+    </button>
+  </nav>
+-->
+  <!-- ═══ HERO ═══ -->
+  <section class="hero" id="hero">
+    <div class="hero-badge">
+      <i class="fi fi-br-shield-check" aria-hidden="true"></i>
+      Tópico Interdisciplinar · Arquitetura &amp; Urbanismo · FLF
+    </div>
+    <h1 class="hero-title">
+      Sobral,<em>Lugar de Memória</em>
+    </h1>
+    <p class="hero-sub">
+      Uma jornada pelo tempo e pelo espaço urbano de Sobral-CE, resgatando as memórias afetivas dos idosos nos espaços
+      públicos da cidade.
+    </p>
+    <div class="hero-chips">
+      <div class="chip glass" role="listitem">
+        <div class="chip-icon" style="background:rgba(196,136,42,.12);color:var(--amber)">
+          <i class="fi fi-br-home" aria-hidden="true"></i>
+        </div>
+        Espaços Públicos
+      </div>
+      <div class="chip glass" role="listitem">
+        <div class="chip-icon" style="background:rgba(184,79,98,.12);color:var(--rose)">
+          <i class="fi fi-br-heart" aria-hidden="true"></i>
+        </div>
+        Memórias Afetivas
+      </div>
+      <div class="chip glass" role="listitem">
+        <div class="chip-icon" style="background:rgba(61,138,127,.12);color:var(--teal)">
+          <i class="fi fi-br-clock" aria-hidden="true"></i>
+        </div>
+        História Viva
+      </div>
+      <div class="chip glass" role="listitem">
+        <div class="chip-icon" style="background:rgba(123,110,170,.12);color:var(--lavender)">
+          <i class="fi fi-br-user" aria-hidden="true"></i>
+        </div>
+        Vozes dos Idosos
+      </div>
+    </div>
+    <div class="scroll-cue" aria-hidden="true">
+      <i class="fi fi-br-angle-down"></i>
+      Role para explorar
+    </div>
+  </section>
+
+  <!-- ═══ METODOLOGIA ═══ -->
+  <section class="method" id="metodologia">
+    <div class="container">
+      <div class="method-head reveal">
+        <span class="sec-label"><i class="fi fi-br-document" aria-hidden="true"></i> Sobre o Projeto</span>
+        <h2 class="sec-title"><em>Como Construímos</em><br>Este Trabalho</h2>
+        <p class="sec-desc">A disciplina de Tópico Interdisciplinar de Extensão 2 da Faculdade Luciano Feijão guiou o
+          processo de pesquisa e mapeamento das memórias urbanas de Sobral.</p>
+      </div>
+      <div class="steps-grid">
+        <div class="glass step reveal">
+          <div class="step-num" style="background:var(--amber)">1</div>
+          <div class="step-ico" style="background:rgba(196,136,42,.1);color:var(--amber)"><i class="fi fi-br-search"
+              aria-hidden="true"></i></div>
+          <div class="step-name">Pesquisa de Campo</div>
+          <p class="step-info">Visitas aos espaços públicos históricos de Sobral para identificar lugares de memória
+            coletiva.</p>
+        </div>
+        <div class="glass step reveal">
+          <div class="step-num" style="background:var(--rose)">2</div>
+          <div class="step-ico" style="background:rgba(184,79,98,.1);color:var(--rose)"><i class="fi fi-br-microphone"
+              aria-hidden="true"></i></div>
+          <div class="step-name">Entrevistas com Idosos</div>
+          <p class="step-info">Coleta de depoimentos e memórias de moradores com mais de 60 anos sobre os espaços
+            urbanos.</p>
+        </div>
+        <div class="glass step reveal">
+          <div class="step-num" style="background:var(--lavender)">3</div>
+          <div class="step-ico" style="background:rgba(123,110,170,.1);color:var(--lavender)"><i class="fi fi-br-list"
+              aria-hidden="true"></i></div>
+          <div class="step-name">Análise &amp; Catalogação</div>
+          <p class="step-info">Organização e análise das narrativas com base em referências teóricas de memória
+            coletiva.</p>
+        </div>
+        <div class="glass step reveal">
+          <div class="step-num" style="background:var(--teal)">4</div>
+          <div class="step-ico" style="background:rgba(61,138,127,.1);color:var(--teal)"><i class="fi fi-br-laptop"
+              aria-hidden="true"></i></div>
+          <div class="step-name">Divulgação Digital</div>
+          <p class="step-info">Criação desta página web educativa para compartilhar as memórias com toda a comunidade.
+          </p>
+        </div>
+      </div>
+
+      <div class="glass-strong org-card reveal">
+        <div class="org-icon" style="background:linear-gradient(135deg,var(--amber),var(--rose))"><i
+            class="fi fi-br-graduation-cap" aria-hidden="true"></i></div>
+        <div class="org-info">
+          <div class="org-name">Faculdade Luciano Feijão — FLF</div>
+          <div class="org-detail">Curso de Arquitetura e Urbanismo · Tópico Interdisciplinar de Extensão 2<br><strong
+              style="color:var(--accent)">Sobral, Ceará, Brasil</strong></div>
+        </div>
+        <div class="org-meta">
+          <div class="org-meta-item"><i class="fi fi-br-marker" style="color:var(--amber)" aria-hidden="true"></i>
+            Sobral · CE</div>
+          <div class="org-meta-item"><i class="fi fi-br-user" style="color:var(--rose)" aria-hidden="true"></i> Extensão
+            Universitária</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SOBRE A CIDADE ═══ -->
+  <section class="about" id="sobre">
+    <div class="container">
+      <div class="reveal">
+        <span class="sec-label"><i class="fi fi-br-globe" aria-hidden="true"></i> Conheça a Cidade</span>
+        <h2 class="sec-title">Sobral — <em>O Coração</em><br>do Norte Cearense</h2>
+        <p class="sec-desc">Uma cidade secular que carrega em suas pedras, praças e rios a história de gerações que
+          ajudaram a construir o Ceará.</p>
+      </div>
+
+      <div class="about-grid reveal">
+        <div class="about-main">
+          <div class="glass-strong about-text">
+            <p><strong>Sobral</strong> é um município brasileiro do estado do Ceará, considerado a segunda maior cidade
+              do estado e polo regional do norte cearense. Fundada oficialmente em <strong>1773</strong>, a cidade se
+              desenvolveu às margens do Rio Acaraú, que sempre foi fonte de vida e encontro para seus habitantes.</p>
+            <p>Com mais de <strong>200.000 habitantes</strong> e uma rica história marcada pela cultura, religiosidade e
+              comércio, Sobral possui um centro histórico tombado pelo IPHAN, repleto de edificações que narram séculos
+              de transformações sociais, econômicas e culturais.</p>
+            <p>A cidade é palco de festividades tradicionais, como o <strong>Carnaval de Sobral</strong> e festas
+              religiosas que atravessam gerações, sendo espaços privilegiados de construção e transmissão de memória
+              coletiva.</p>
+          </div>
+          <div class="about-img">
+            <img src="assets/placeholder_01_sobre.png"
+              alt="Idosos conversando nos bancos de uma praça colonial de Sobral, Ceará" loading="lazy" />
+          </div>
+        </div>
+
+        <div class="glass stat reveal">
+          <div class="stat-icon" style="background:rgba(196,136,42,.12);color:var(--amber)"><i class="fi fi-br-marker"
+              aria-hidden="true"></i></div>
+          <div class="stat-val" style="color:var(--amber)">2ª</div>
+          <div class="stat-lbl">Maior cidade<br>do Ceará</div>
+        </div>
+        <div class="glass stat reveal">
+          <div class="stat-icon" style="background:rgba(184,79,98,.12);color:var(--rose)"><i class="fi fi-br-calendar"
+              aria-hidden="true"></i></div>
+          <div class="stat-val" style="color:var(--rose)">1773</div>
+          <div class="stat-lbl">Ano de<br>fundação</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ LUGARES DE MEMÓRIA ═══ -->
+  <section class="places" id="lugares">
+    <div class="container">
+      <div class="places-head reveal">
+        <span class="sec-label"><i class="fi fi-br-marker" aria-hidden="true"></i> Espaços Urbanos</span>
+        <h2 class="sec-title">Lugares que Guardam<br><em>Memórias Vivas</em></h2>
+        <p class="sec-desc">Cada espaço público de Sobral é um repositório de histórias vividas, encontros marcantes e
+          afetos construídos ao longo de décadas.</p>
+      </div>
+
+      <div class="places-grid">
+
+        <article class="glass place reveal" aria-label="Praça da Sé">
+          <div class="place-img">
+            <img src="assets/placeholder_02_praca_se.png" alt="Praça da Sé em Sobral" loading="lazy" />
+          </div>
+          <div class="place-body">
+            <span class="place-tag" style="background:rgba(196,136,42,.1);color:var(--amber)"><i class="fi fi-br-home"
+                aria-hidden="true"></i> Praça Histórica</span>
+            <h3 class="place-name">Praça da Sé</h3>
+            <p class="place-desc">Coração da cidade e ponto de convergência de gerações, sempre foi palco de encontros
+              sociais, procissões religiosas e da vida cotidiana sobralense.</p>
+            <div class="place-quote">
+              <div class="place-quote-icon" style="background:rgba(196,136,42,.1);color:var(--amber)"><i
+                  class="fi fi-br-comment-alt" aria-hidden="true"></i></div>
+              <p><strong style="color:var(--amber)">Memória dos Idosos</strong>"Eu e meu marido nos conhecemos aqui,
+                toda tarde sentávamos no banco em frente à catedral."</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="glass place reveal" aria-label="Teatro São João">
+          <div class="place-img">
+            <img src="assets/placeholder_03_teatro.png" alt="Teatro São João em Sobral" loading="lazy" />
+          </div>
+          <div class="place-body">
+            <span class="place-tag" style="background:rgba(123,110,170,.1);color:var(--lavender)"><i
+                class="fi fi-br-star" aria-hidden="true"></i> Arte &amp; Cultura</span>
+            <h3 class="place-name">Teatro São João</h3>
+            <p class="place-desc">Inaugurado em 1880, é um dos mais antigos do Nordeste ainda em funcionamento. Palco de
+              espetáculos que marcaram a cultura e a vida artística da cidade.</p>
+            <div class="place-quote">
+              <div class="place-quote-icon" style="background:rgba(123,110,170,.1);color:var(--lavender)"><i
+                  class="fi fi-br-comment-alt" aria-hidden="true"></i></div>
+              <p><strong style="color:var(--lavender)">Memória dos Idosos</strong>"Vim assistir à primeira peça com 12
+                anos, de mãos dadas com minha avó. Nunca esqueci."</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="glass place reveal" aria-label="Estação Ferroviária">
+          <div class="place-img">
+            <img src="assets/placeholder_04_estacao.png" alt="Estação Ferroviária de Sobral" loading="lazy" />
+          </div>
+          <div class="place-body">
+            <span class="place-tag" style="background:rgba(184,79,98,.1);color:var(--rose)"><i class="fi fi-br-building"
+                aria-hidden="true"></i> Patrimônio</span>
+            <h3 class="place-name">Estação Ferroviária</h3>
+            <p class="place-desc">Símbolo do progresso e das partidas e chegadas que marcaram vidas inteiras. Testemunha
+              de histórias de migração, reencontros e saudade.</p>
+            <div class="place-quote">
+              <div class="place-quote-icon" style="background:rgba(184,79,98,.1);color:var(--rose)"><i
+                  class="fi fi-br-comment-alt" aria-hidden="true"></i></div>
+              <p><strong style="color:var(--rose)">Memória dos Idosos</strong>"Despedi meu pai nessa plataforma. Chorei
+                tanto quanto na última vez que o vi."</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="glass place reveal" aria-label="Rio Acaraú">
+          <div class="place-img">
+            <img src="assets/placeholder_05_rio.png" alt="Idoso contemplando o Rio Acaraú ao pôr do sol"
+              loading="lazy" />
+          </div>
+          <div class="place-body">
+            <span class="place-tag" style="background:rgba(61,138,127,.1);color:var(--teal)"><i class="fi fi-br-leaf"
+                aria-hidden="true"></i> Natureza</span>
+            <h3 class="place-name">Rio Acaraú</h3>
+            <p class="place-desc">Alma de Sobral, o Rio Acaraú abasteceu a cidade, permitiu o lazer de crianças e foi
+              palco de rituais e festividades que atravessaram séculos.</p>
+            <div class="place-quote">
+              <div class="place-quote-icon" style="background:rgba(61,138,127,.1);color:var(--teal)"><i
+                  class="fi fi-br-comment-alt" aria-hidden="true"></i></div>
+              <p><strong style="color:var(--teal)">Memória dos Idosos</strong>"Aprendi a nadar no Acaraú. Todos os
+                meninos do bairro iam lá de manhã cedo."</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="glass place reveal" aria-label="Mercado Central">
+          <div class="place-img">
+            <img src="assets/placeholder_06_mercado.png" alt="Mercado popular com vendedores idosos e frutas regionais"
+              loading="lazy" />
+          </div>
+          <div class="place-body">
+            <span class="place-tag" style="background:rgba(196,136,42,.1);color:var(--amber)"><i class="fi fi-br-shop"
+                aria-hidden="true"></i> Comércio Popular</span>
+            <h3 class="place-name">Mercado Central</h3>
+            <p class="place-desc">O ponto de encontro da cultura popular sobralense — cheiro de temperos, músicas
+              regionais e a labuta cotidiana que alimentou famílias inteiras.</p>
+            <div class="place-quote">
+              <div class="place-quote-icon" style="background:rgba(196,136,42,.1);color:var(--amber)"><i
+                  class="fi fi-br-comment-alt" aria-hidden="true"></i></div>
+              <p><strong style="color:var(--amber)">Memória dos Idosos</strong>"Minha mãe tinha barraca de frutas aqui.
+                Vim ajudá-la desde os 7 anos toda sexta-feira."</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="glass place reveal" aria-label="Praça do Patrocínio">
+          <div class="place-img">
+            <img src="assets/placeholder_08_galeria_maos.png" alt="Praça do Patrocínio em Sobral" loading="lazy" />
+          </div>
+          <div class="place-body">
+            <span class="place-tag" style="background:rgba(123,110,170,.1);color:var(--lavender)"><i
+                class="fi fi-br-calendar" aria-hidden="true"></i> Festas &amp; Tradição</span>
+            <h3 class="place-name">Praça do Patrocínio</h3>
+            <p class="place-desc">Era o coração das festas de São João e das novenas, com quiosques, leilões e
+              celebrações que reuniam a vizinhança. Hoje o espaço lembra a alegria de uma comunidade que se reunia para
+              celebrar e se conectar.</p>
+            <div class="place-quote">
+              <div class="place-quote-icon" style="background:rgba(123,110,170,.1);color:var(--lavender)"><i
+                  class="fi fi-br-comment-alt" aria-hidden="true"></i></div>
+              <p><strong style="color:var(--lavender)">D. Maria de Lourdes - 81 Anos</strong>"A praça era viva demais,
+                com quiosques, quadrilhas e novenas. Hoje ficou tudo só na memória."</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="glass place reveal" aria-label="Igreja do Rosário">
+          <div class="place-img">
+            <img src="assets/placeholder_07_igreja.png" alt="Igreja do Rosário em Sobral" loading="lazy" />
+          </div>
+          <div class="place-body">
+            <span class="place-tag" style="background:rgba(61,138,127,.1);color:var(--teal)"><i class="fi fi-br-cross"
+                aria-hidden="true"></i> Fé &amp; Religiosidade</span>
+            <h3 class="place-name">Igreja do Rosário</h3>
+            <p class="place-desc">Uma das mais antigas igrejas da cidade, palco de batismos, casamentos e missas que
+              marcaram a fé e a identidade cultural de gerações.</p>
+            <div class="place-quote">
+              <div class="place-quote-icon" style="background:rgba(61,138,127,.1);color:var(--teal)"><i
+                  class="fi fi-br-comment-alt" aria-hidden="true"></i></div>
+              <p><strong style="color:var(--teal)">Memória dos Idosos</strong>"Me casei aqui em 1965. A fila da
+                procissão enchia toda a rua do Rosário."</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="glass place reveal" aria-label="Praça Quirino Rodrigues">
+          <div class="place-img">
+            <img src="assets/pracaabrigo.png" alt="Praça Quirino Rodrigues, conhecida como Praça do Abrigo, em Sobral"
+              loading="lazy" />
+          </div>
+          <div class="place-body">
+            <span class="place-tag" style="background:rgba(196,136,42,.1);color:var(--amber)"><i class="fi fi-br-users"
+                aria-hidden="true"></i> Convívio &amp; Lazer</span>
+            <h3 class="place-name">Praça Quirino Rodrigues</h3>
+            <p class="place-desc">Conhecida como Praça do Abrigo ou Praça do Farias Brito, é um espaço de convívio
+              intergeracional: idosos nos jogos de mesa, crianças no anfiteatro, tutores com animais e a animação dos
+              trailers de lanches. A proximidade com a Capela Nossa Senhora das Graças transforma o local em ponto de
+              passagem e permanência.</p>
+            <div class="place-quote">
+              <div class="place-quote-icon" style="background:rgba(196,136,42,.1);color:var(--amber)"><i
+                  class="fi fi-br-comment-alt" aria-hidden="true"></i></div>
+              <p><strong style="color:var(--amber)">Seu Júlio - 62 Anos</strong>"Venho aqui há uns nove anos. A praça
+                tem boa iluminação, é tranquila. Mas sinto falta da quadra que tinha — desde que colocaram o obelisco
+                no lugar dela, o movimento caiu bastante."</p>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ VOZES ═══ -->
+  <section class="voices" id="vozes">
+    <div class="container">
+      <div class="reveal">
+        <span class="sec-label"><i class="fi fi-br-users" aria-hidden="true"></i> Vozes da Cidade</span>
+        <h2 class="sec-title">A Memória que<br><em>os Idosos Guardam</em></h2>
+      </div>
+      <div class="voices-grid">
+        <div class="voices-text reveal">
+          <p>A memória coletiva de uma cidade não está apenas nos livros ou monumentos — ela vive nas
+            <strong>pessoas</strong>. Os idosos de Sobral são guardiões de uma história viva, que resgata o cotidiano
+            das ruas, as transformações dos espaços públicos e as relações humanas tecidas ao longo do tempo.
+          </p>
+          <p>Por meio de conversas e entrevistas realizadas pelo grupo de estudantes de Arquitetura e Urbanismo da
+            Faculdade Luciano Feijão, foi possível captar fragmentos preciosos dessa memória afetiva que conecta passado
+            e presente.</p>
+          <p>O conceito de <strong>"Lugar de Memória"</strong>, desenvolvido pelo historiador Pierre Nora, refere-se aos
+            espaços, objetos e práticas onde a memória coletiva se ancora — sejam físicos, simbólicos ou funcionais.</p>
+          <blockquote class="quote-box glass">
+            <p>"Os lugares de memória existem porque não há mais meios de memória. Se habitássemos ainda nossa memória,
+              não teríamos necessidade de lhe consagrar lugares."</p>
+            <cite>— Pierre Nora, historiador francês</cite>
+          </blockquote>
+        </div>
+
+        <div class="testimonials reveal" role="list" aria-label="Depoimentos de moradores idosos">
+
+          <div class="glass-strong testimony" role="listitem">
+            <div class="testimony-head">
+              <div class="testimony-avatar" style="background:linear-gradient(135deg,var(--lavender),var(--teal))">M
+              </div>
+              <div class="testimony-info">
+                <strong>Dona Maria de Lourdes</strong>
+                <span>81 anos · Praça do Patrocínio</span>
+              </div>
+            </div>
+            <p class="testimony-body">
+              <i class="fi fi-br-quote-right" aria-hidden="true"></i>
+              "Olha, chegar aqui nos anos 80 foi uma beleza, a praça era viva demais. Eu sinto uma saudade danada dos
+              quiosques e das festas de antigamente. Na época de São João, o povo se reunia para ver as quadrilhas e as
+              novenas de Nossa Senhora do Patrocínio eram coisa de cinema. Tinha aquele monte de barraca que passava dias
+              montada, o povo doava as coisas e a gente fazia leilão até tarde da noite. A gente tinha paciência para
+              estar junto e a praça era o coração da nossa vizinhança.
+
+              O que mais me corta o coração é ver como o medo mudou tudo. Antigamente, quando a chuva caía, a praça
+              virava uma festa: as crianças tomavam banho de chuva, saíam todas correndo e sorrindo, jogando bola e
+              andando de bicicleta... era uma alegria que contagiava a gente. Hoje não se vê mais nada disso, ficou tudo
+              só na memória mesmo. As crianças de agora vivem presas na tecnologia e não saem de casa, e a praça nem tem
+              mais os brinquedos que tinha antes para elas.
+
+              O povo até vem para a missa, mas acaba a benção e todo mundo corre para se trancar, com medo de assalto.
+              Minha vizinha mesmo foi assaltada e nunca mais teve coragem de botar a cadeira na calçada; a gente perdeu
+              aquele costume bom de sentar na porta e conversar. Até na igreja mudou; como o Padre não deu mais valor ao
+              nosso grupo das procissões, tive que ir servir lá no São Francisco. A praça passou um tempo abandonada,
+              com gente usando droga à luz do dia, e isso espantou as famílias. Hoje, os vizinhos antigos se foram e os
+              novos a gente nem conhece o rosto. A segurança e o silêncio das calçadas tiraram a vida que a nossa praça
+              tinha."
+            </p>
+          </div>
+
+          <div class="glass-strong testimony" role="listitem">
+            <div class="testimony-head">
+              <div class="testimony-avatar" style="background:linear-gradient(135deg,var(--amber),var(--rose))">J</div>
+              <div class="testimony-info">
+                <strong>Seu Júlio</strong>
+                <span>62 anos · Praça Quirino Rodrigues</span>
+              </div>
+            </div>
+            <p class="testimony-body">
+              <i class="fi fi-br-quote-right" aria-hidden="true"></i>
+              "Eu venho aqui há uns nove anos, pode crer. Todo fim de tarde, quando dá, a gente chega, puxa uma cadeira
+              e já vai logo pro jogo. É um hábito que a gente foi criando com os amigos. A praça tem uma iluminação
+              boa, é tranquila, dá pra ficar à vontade sem preocupação. Os trailers de churros e sorvete ali do lado
+              ajudam também — todo mundo para um pouquinho, lança um assunto, e o tempo vai passando. A Capelinha de
+              Nossa Senhora das Graças atrai bastante gente e isso dá um movimento bonito ao lugar.
+
+              Mas o que eu sinto falta mesmo é da quadra. Tinha uma quadra de esportes aqui que era o coração da praça.
+              Os meninos jogavam bola, a molecada se juntava, as famílias paravam pra assistir — era outra vida. Aí
+              tiraram a quadra e colocaram um obelisco bem no centro. Pode ser bonito pra fotografia, não sei, mas pra
+              população não serve pra nada. Eu nunca entendi essa decisão. Desde que tiraram a quadra, o fluxo de
+              pessoas diminuiu bastante. Quem vinha por causa do esporte foi sumindo aos poucos.
+
+              Brinquedo de criança também tinha antes. A praça tinha essa coisa de juntar todo tipo de gente, de todas
+              as idades. Hoje ficou mais para os mais velhos como eu e meus companheiros de jogo. Não estou reclamando,
+              porque pra nós tá bom. Mas a praça podia ser muito mais do que é hoje. Ela tem espaço, tem estrutura,
+              tem iluminação — só precisava voltar a ter vida pra todo mundo, não só pra nós da terceira idade."
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       SOBRAL EM IMAGENS
+       ═══════════════════════════════════════════════════ -->
+  <section class="gallery" id="galeria">
+    <div class="container">
+
+      <!-- Cabeçalho -->
+      <div class="gallery-head reveal">
+        <span class="sec-label"><i class="fi fi-br-camera-retro" aria-hidden="true"></i> Sobral em Imagens</span>
+        <h2 class="sec-title">A Cidade que<br><em>Eles Viveram</em></h2>
+        <p class="sec-desc">Fotografias históricas apresentadas a quem as viveu — e as memórias que cada enquadramento
+          despertou.</p>
+      </div>
+
+      <!-- ── Bloco de metodologia + fala do casal ── -->
+      <div class="gallery-intro glass-strong reveal">
+
+        <div class="gallery-intro-text">
+          <p>Para esta seção, a abordagem metodológica foi diferente. Em vez de visitar os espaços, os estudantes
+            <strong>levaram os espaços até as pessoas</strong> — por meio de um acervo de fotografias históricas de
+            Sobral, registradas entre as décadas de 1970 e 2000. As imagens foram apresentadas sem pressa, uma a uma,
+            deixando que as lembranças aflorassem naturalmente a partir de cada enquadramento.</p>
+          <p><strong>Seu Luiz</strong> (64 anos) e <strong>Dona Socorro</strong> (57 anos) receberam esse convite. 
+            Sentados juntos, voltaram a ser adolescentes, décadas de uma Sobral que se mantém em suas memórias — as escolas
+            onde estudaram, os programas que faziam, os lugares onde construíram sua história... com lágrimas de nostalgia
+            contaram tudo o que presenciaram ao longo desses anos na cidade que tanto amam.</p>
+        </div>
+
+        <blockquote class="gallery-couple-quote">
+          <div class="couple-avatars" aria-hidden="true">
+            <div class="couple-avatar couple-avatar--l">L</div>
+            <div class="couple-avatar couple-avatar--s">S</div>
+          </div>
+          <p>"Foram várias vezes que, durante as quintas-feiras a gente ia ao Cine Rangel assistir um filme, 
+            e depois descia pro Beco do Cotovelo para jantar na pizzaria da Beth. Era a Quinta sem Lei, parece que a cidade toda se juntava lá pra ouvir aquelas músicas ao vivo.
+            O Luiz estudou no Coração de Jesus, eu no Santana, mas a cidade sempre nos juntava nesses lugares. Ele ainda
+            lembra do posto de gasolina que ficava bem em frente ao Arco, na Boulevard — antes de tudo aquilo mudar do
+            jeito que está hoje."</p>
+          <cite>Dona Socorro, 57 anos · Seu Luiz, 64 anos</cite>
+        </blockquote>
+
+      </div><!-- /gallery-intro -->
+
+    </div><!-- /container — o carrosel sai do container para ser full-width -->
+
+    <!--
+      ╔══════════════════════════════════════════════╗
+      ║  CARROSEL DE IMAGENS                         ║
+      ║  Classes de aspecto:                         ║
+      ║    .horiz  → 3:2  (360 × 240 px)             ║
+      ║    .vert   → 2:3  (240 × 360 px)             ║
+      ╚══════════════════════════════════════════════╝
+    -->
+    <div class="gallery-marquee-wrap" role="region" aria-label="Carrosel de fotografias de Sobral">
+
+      <!-- Trilha principal -->
+      <div class="marquee-track">
+
+        <!-- ★ FOTOGRAFIAS HISTÓRICAS ★ -->
+        <div class="gal vert">
+          <img src="assets/patrocinio_antigo.png" alt="Praça do Patrocínio Antiga" loading="lazy" />
+          <div class="gal-era">Anos 70–90</div>
+          <div class="gal-over"></div>
+          <div class="gal-cap">Praça do Patrocínio Antiga</div>
+        </div>
+
+        <div class="gal horiz">
+          <img src="assets/arco_antigo.png" alt="Boulevard do Arco de Sobral vista de cima" loading="lazy" />
+          <div class="gal-era">Anos 70–90</div>
+          <div class="gal-over"></div>
+          <div class="gal-cap">Boulevard do Arco — Vista Aérea</div>
+        </div>
+
+        <div class="gal horiz">
+          <img src="assets/coracaojesus.png" alt="Antigo Ginásio Coração de Jesus" loading="lazy" />
+          <div class="gal-era">Anos 70–90</div>
+          <div class="gal-over"></div>
+          <div class="gal-cap">Ginásio Coração de Jesus</div>
+        </div>
+
+        <div class="gal horiz">
+          <img src="assets/beco.png" alt="Beth's Pizzaria no Beco do Cotovelo" loading="lazy" />
+          <div class="gal-era">Anos 70–90</div>
+          <div class="gal-over"></div>
+          <div class="gal-cap">Beth's Pizzaria — Beco do Cotovelo</div>
+        </div>
+
+        <div class="gal horiz">
+          <img src="assets/beco2.png" alt="Clientes na Beth's Pizzaria durante a Quinta sem Lei" loading="lazy" />
+          <div class="gal-era">Anos 70–90</div>
+          <div class="gal-over"></div>
+          <div class="gal-cap">Quinta sem Lei no Beco do Cotovelo</div>
+        </div>
+
+        <div class="gal horiz">
+          <img src="assets/arco_antigo2.png" alt="Arco de Sobral visto da rua" loading="lazy" />
+          <div class="gal-era">Anos 70–90</div>
+          <div class="gal-over"></div>
+          <div class="gal-cap">Arco — Vista da Rua</div>
+        </div>
+
+        <!-- ★ FOTOGRAFIAS CONTEMPORÂNEAS ★ -->
+        <div class="gal vert">
+          <img src="assets/placeholder_09_catedral_vert.png" alt="Catedral de Sobral" loading="lazy" />
+          <div class="gal-over"></div>
+          <div class="gal-cap">Catedral</div>
+        </div>
+
+        <div class="gal horiz">
+          <img src="assets/placeholder_02_praca_se.png" alt="Praça da Sé" loading="lazy" />
+          <div class="gal-over"></div>
+          <div class="gal-cap">Praça da Sé</div>
+        </div>
+
+        <div class="gal horiz">
+          <img src="assets/placeholder_03_teatro.png" alt="Teatro São João" loading="lazy" />
+          <div class="gal-over"></div>
+          <div class="gal-cap">Teatro São João</div>
+        </div>
+
+        <div class="gal vert">
+          <img src="assets/placeholder_11_vert.png" alt="Ruela Histórica de Sobral" loading="lazy" />
+          <div class="gal-over"></div>
+          <div class="gal-cap">Ruela Histórica</div>
+        </div>
+
+        <div class="gal horiz">
+          <img src="assets/placeholder_05_rio.png" alt="Rio Acaraú" loading="lazy" />
+          <div class="gal-over"></div>
+          <div class="gal-cap">Rio Acaraú</div>
+        </div>
+
+        <div class="gal horiz">
+          <img src="assets/placeholder_07_igreja.png" alt="Igreja do Rosário" loading="lazy" />
+          <div class="gal-over"></div>
+          <div class="gal-cap">Igreja do Rosário</div>
+        </div>
+
+        <div class="gal vert">
+          <img src="assets/placeholder_14_vert.png" alt="Escadaria Histórica" loading="lazy" />
+          <div class="gal-over"></div>
+          <div class="gal-cap">Escadaria Histórica</div>
+        </div>
+
+        <div class="gal horiz">
+          <img src="assets/placeholder_06_mercado.png" alt="Mercado Central de Sobral" loading="lazy" />
+          <div class="gal-over"></div>
+          <div class="gal-cap">Mercado Central</div>
+        </div>
+
+        <div class="gal vert">
+          <img src="assets/pracaabrigo.png" alt="Praça Quirino Rodrigues" loading="lazy" />
+          <div class="gal-over"></div>
+          <div class="gal-cap">Praça do Abrigo</div>
+        </div>
+
+        <div class="gal horiz">
+          <img src="assets/placeholder_04_estacao.png" alt="Estação Ferroviária de Sobral" loading="lazy" />
+          <div class="gal-over"></div>
+          <div class="gal-cap">Estação Ferroviária</div>
+        </div>
+
+      </div><!-- /marquee-track (original) -->
+
+      <!-- Cópia para loop contínuo (aria-hidden) -->
+      <div class="marquee-track" aria-hidden="true">
+
+        <div class="gal vert"><img src="assets/patrocinio_antigo.png" alt="" loading="lazy" />
+          <div class="gal-era">Anos 70–90</div><div class="gal-over"></div>
+          <div class="gal-cap">Praça do Patrocínio Antiga</div></div>
+
+        <div class="gal horiz"><img src="assets/arco_antigo.png" alt="" loading="lazy" />
+          <div class="gal-era">Anos 70–90</div><div class="gal-over"></div>
+          <div class="gal-cap">Boulevard do Arco — Vista Aérea</div></div>
+
+        <div class="gal horiz"><img src="assets/coracaojesus.png" alt="" loading="lazy" />
+          <div class="gal-era">Anos 70–90</div><div class="gal-over"></div>
+          <div class="gal-cap">Ginásio Coração de Jesus</div></div>
+
+        <div class="gal horiz"><img src="assets/beco.png" alt="" loading="lazy" />
+          <div class="gal-era">Anos 70–90</div><div class="gal-over"></div>
+          <div class="gal-cap">Beth's Pizzaria — Beco do Cotovelo</div></div>
+
+        <div class="gal horiz"><img src="assets/beco2.png" alt="" loading="lazy" />
+          <div class="gal-era">Anos 70–90</div><div class="gal-over"></div>
+          <div class="gal-cap">Quinta sem Lei no Beco do Cotovelo</div></div>
+
+        <div class="gal horiz"><img src="assets/arco_antigo2.png" alt="" loading="lazy" />
+          <div class="gal-era">Anos 70–90</div><div class="gal-over"></div>
+          <div class="gal-cap">Arco — Vista da Rua</div></div>
+
+        <div class="gal vert"><img src="assets/placeholder_09_catedral_vert.png" alt="" loading="lazy" />
+          <div class="gal-over"></div><div class="gal-cap">Catedral</div></div>
+
+        <div class="gal horiz"><img src="assets/placeholder_02_praca_se.png" alt="" loading="lazy" />
+          <div class="gal-over"></div><div class="gal-cap">Praça da Sé</div></div>
+
+        <div class="gal horiz"><img src="assets/placeholder_03_teatro.png" alt="" loading="lazy" />
+          <div class="gal-over"></div><div class="gal-cap">Teatro São João</div></div>
+
+        <div class="gal vert"><img src="assets/placeholder_11_vert.png" alt="" loading="lazy" />
+          <div class="gal-over"></div><div class="gal-cap">Ruela Histórica</div></div>
+
+        <div class="gal horiz"><img src="assets/placeholder_05_rio.png" alt="" loading="lazy" />
+          <div class="gal-over"></div><div class="gal-cap">Rio Acaraú</div></div>
+
+        <div class="gal horiz"><img src="assets/placeholder_07_igreja.png" alt="" loading="lazy" />
+          <div class="gal-over"></div><div class="gal-cap">Igreja do Rosário</div></div>
+
+        <div class="gal vert"><img src="assets/placeholder_14_vert.png" alt="" loading="lazy" />
+          <div class="gal-over"></div><div class="gal-cap">Escadaria Histórica</div></div>
+
+        <div class="gal horiz"><img src="assets/placeholder_06_mercado.png" alt="" loading="lazy" />
+          <div class="gal-over"></div><div class="gal-cap">Mercado Central</div></div>
+
+        <div class="gal vert"><img src="assets/pracaabrigo.png" alt="" loading="lazy" />
+          <div class="gal-over"></div><div class="gal-cap">Praça do Abrigo</div></div>
+
+        <div class="gal horiz"><img src="assets/placeholder_04_estacao.png" alt="" loading="lazy" />
+          <div class="gal-over"></div><div class="gal-cap">Estação Ferroviária</div></div>
+
+      </div><!-- /marquee-track (clone) -->
+
+    </div><!-- /gallery-marquee-wrap -->
+
+  </section><!-- /#galeria -->
+
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="glass-strong footer-inner reveal">
+        <div class="footer-logo">Sobral — <em>Lugar de Memória</em></div>
+        <p class="footer-desc">Trabalho acadêmico desenvolvido pelos estudantes do curso de Arquitetura e Urbanismo da
+          Faculdade Luciano Feijão como parte da disciplina de Tópico Interdisciplinar de Extensão 2. Um exercício de
+          escuta, memória e valorização do patrimônio afetivo de Sobral, CE.</p>
+        <div class="footer-chips">
+          <span class="footer-chip">Arquitetura &amp; Urbanismo</span>
+          <span class="footer-chip">Memória Coletiva</span>
+          <span class="footer-chip">Patrimônio Cultural</span>
+          <span class="footer-chip">Extensão Universitária</span>
+          <span class="footer-chip">Sobral · CE</span>
+          <span class="footer-chip">Faculdade Luciano Feijão</span>
+        </div>
+        <p class="footer-copy">© 2025 FLF · Tópico Interdisciplinar de Extensão 2 · Todos os direitos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
