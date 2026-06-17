@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sobral: Lugares de Memória — ARNA 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* === RESET & BASE === */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:    #0d1b2a;
+  --teal:    #1b4f72;
+  --teal2:   #2e86ab;
+  --sand:    #c9a96e;
+  --sand2:   #e8d5b0;
+  --white:   #f5f0e8;
+  --glass:   rgba(255,255,255,0.06);
+  --glass2:  rgba(255,255,255,0.12);
+  --border:  rgba(255,255,255,0.15);
+  --shadow:  0 8px 32px rgba(0,0,0,0.4);
+  --b1:      #c9a96e; /* Block 1 accent - sand/gold */
+  --b2:      #4db6ac; /* Block 2 accent - teal green */
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--navy);
+  color: var(--white);
+  font-family: 'Outfit', sans-serif;
+}
+
+/* === CANVAS BACKGROUND === */
+#xmb-canvas {
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none;
+}
+
+/* === SLIDESHOW WRAPPER === */
+#slideshow {
+  position: relative; z-index: 1;
+  width: 100vw; height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* === SLIDE === */
+.slide {
+  display: none;
+  position: absolute; inset: 0;
+  flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 1rem 3rem;
+  animation: fadeIn .5s ease;
+}
+.slide.active { display: flex; }
+
+@keyframes fadeIn {
+  from { opacity:0; transform: translateY(12px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+/* === BLOCK BADGES === */
+.block-badge {
+  position: absolute;
+  top: 1.5rem; left: 50%; transform: translateX(-50%);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0.4rem 1.2rem;
+  border-radius: 99px;
+  backdrop-filter: blur(12px);
+  border: 1px solid;
+}
+.block-badge.b1 {
+  background: rgba(201,169,110,0.15);
+  border-color: var(--b1);
+  color: var(--b1);
+}
+.block-badge.b2 {
+  background: rgba(77,182,172,0.15);
+  border-color: var(--b2);
+  color: var(--b2);
+}
+
+/* === GLASS CARD === */
+.glass-card {
+  background: var(--glass2);
+  border: 1px solid var(--border);
+  border-radius: 1.2rem;
+  backdrop-filter: blur(20px);
+  box-shadow: var(--shadow);
+  padding: 2.5rem 3rem;
+}
+.glass-card-sm {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+  backdrop-filter: blur(12px);
+  padding: 1.2rem 1.6rem;
+}
+
+/* === TYPOGRAPHY === */
+.display-title {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(3rem, 6vw, 5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--white);
+}
+.display-title em {
+  font-style: italic;
+  color: var(--sand);
+}
+.slide-title {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(2rem, 3.5vw, 3.2rem);
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--white);
+}
+.slide-title em {
+  font-style: italic;
+  color: var(--sand);
+}
+.eyebrow {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  margin-bottom: 0.8rem;
+}
+.body-text {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(1rem, 1.4vw, 1.3rem);
+  font-weight: 300;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+.caption {
+  font-size: 0.85rem;
+  font-weight: 400;
+  opacity: 0.6;
+  font-style: italic;
+}
+
+/* === ACCENT LINES === */
+.accent-line {
+  width: 5rem; height: 4px;
+  background: linear-gradient(90deg, var(--sand), transparent);
+  margin: 1.2rem 0;
+}
+.accent-line.b2 {
+  background: linear-gradient(90deg, var(--b2), transparent);
+}
+
+/* === GRID LAYOUTS === */
+.two-col {
+  display: grid;
+  grid-template-columns: 1.4fr 0.6fr; /* Heavily favoring images on the left */
+  gap: 4rem;
+  width: 100%;
+  max-width: 1600px;
+}
+/* Flip for variety or specific slides - Image on right */
+.two-col.img-right {
+  grid-template-columns: 0.6fr 1.4fr;
+}
+
+.three-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 2rem;
+  width: 100%;
+  max-width: 1500px;
+}
+.img-col { display: flex; flex-direction: column; gap: 1.5rem; }
+.text-col { display: flex; flex-direction: column; justify-content: center; gap: 1.5rem; }
+
+/* === PHOTO FRAME === */
+.photo-frame {
+  border-radius: 1.2rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.photo-frame:hover {
+  transform: scale(1.03);
+  border-color: var(--sand);
+}
+.photo-frame img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* === ICON FEATURE === */
+.icon-feature {
+  display: flex; align-items: flex-start; gap: 1.2rem;
+  margin-bottom: 1.2rem;
+}
+.icon-feature .fa-icon {
+  color: var(--sand);
+  font-size: 1.4rem;
+  margin-top: 0.3rem;
+  flex-shrink: 0;
+}
+.icon-feature .fa-icon.b2 { color: var(--b2); }
+
+/* === PILL TAGS === */
+.pill-row {
+  display: flex; flex-wrap: wrap; gap: 0.8rem;
+  margin-top: 1rem;
+}
+.pill {
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.4rem 1.2rem;
+  border-radius: 99px;
+  border: 1px solid;
+}
+.pill.gold { background: rgba(201,169,110,0.12); border-color: var(--b1); color: var(--b1); }
+.pill.teal { background: rgba(77,182,172,0.12); border-color: var(--b2); color: var(--b2); }
+.pill.white { background: rgba(255,255,255,0.07); border-color: var(--border); color: var(--white); }
+
+/* === QUOTE CARD === */
+.quote-card {
+  background: rgba(201,169,110,0.08);
+  border-left: 5px solid var(--b1);
+  border-radius: 0 1rem 1.2rem 0;
+  padding: 1.5rem 2.5rem;
+}
+.quote-card.b2 {
+  background: rgba(77,182,172,0.08);
+  border-left-color: var(--b2);
+}
+
+/* === CONTROLS === */
+#controls {
+  position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+  z-index: 10;
+  display: flex; align-items: center; gap: 2rem;
+  background: rgba(13,27,42,0.6);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 0.8rem 2rem;
+  backdrop-filter: blur(16px);
+}
+#controls button {
+  background: none; border: none; cursor: pointer;
+  color: var(--white); opacity: 0.6;
+  font-size: 1.2rem;
+  transition: all .3s;
+  padding: 0.4rem 1rem;
+}
+#controls button:hover { opacity: 1; transform: scale(1.1); }
+
+/* === COVER SPECIFIC === */
+.cover-grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 5rem;
+  align-items: center;
+  max-width: 1600px;
+  width: 100%;
+}
+.cover-meta {
+  display: flex; flex-direction: column; gap: 0.8rem;
+  margin-top: 2.5rem;
+}
+.cover-meta-item {
+  display: flex; align-items: center; gap: 1rem;
+  font-size: 1.1rem; opacity: 0.7;
+}
+.cover-meta-item i { color: var(--sand); width: 1.5rem; text-align: center; }
+
+/* === WEBSITE PREVIEW === */
+.site-preview {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 1.2rem;
+  overflow: hidden;
+  height: 650px;
+  display: flex; flex-direction: column;
+}
+.site-preview-bar {
+  background: rgba(255,255,255,0.08);
+  padding: 0.8rem 1.2rem;
+  display: flex; align-items: center; gap: 0.8rem;
+  border-bottom: 1px solid var(--border);
+}
+.site-preview-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+}
+.site-preview-url {
+  font-size: 0.9rem; opacity: 0.5; margin-left: 0.6rem;
+}
+.site-preview-content {
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+  flex: 1;
+}
+.site-thumb {
+  border-radius: 0.8rem;
+  overflow: hidden;
+  aspect-ratio: 4/3;
+  background: rgba(255,255,255,0.05);
+}
+.site-thumb img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+
+/* === NUMBER HIGHLIGHT === */
+.big-number {
+  font-family: 'Fraunces', serif;
+  font-size: 5.5rem;
+  font-weight: 700;
+  color: var(--sand);
+  line-height: 1;
+}
+.big-number.b2 { color: var(--b2); }
+
+/* === STEP LIST === */
+.step-list {
+  display: flex; flex-direction: column; gap: 1.5rem;
+}
+.step-item {
+  display: flex; align-items: flex-start; gap: 1.5rem;
+}
+.step-num {
+  font-family: 'Fraunces', serif;
+  font-size: 1.8rem;
+  color: var(--sand);
+  font-weight: 700;
+  min-width: 2.5rem;
+  line-height: 1.5;
+}
+.step-num.b2 { color: var(--b2); }
+
+</style>
+</head>
+<body>
+
+<canvas id="xmb-canvas"></canvas>
+
+<div id="slideshow">
+
+  <!-- ========== SLIDE 0: CAPA ========== -->
+  <div class="slide active" id="s0">
+    <div class="cover-grid">
+      <div style="display:flex;flex-direction:column;gap:2rem;">
+        <div class="eyebrow" style="color:var(--b1);">
+          <i class="fa-solid fa-globe-americas" style="margin-right:0.5rem;"></i>
+          ARNA 2026 · Hybrid Annual Conference
+        </div>
+        <h1 class="display-title">
+          Sobral:<br>
+          <em>Lugares de Memória,</em><br>
+          Vozes dos Idosos
+        </h1>
+        <div class="accent-line"></div>
+        <p class="body-text" style="max-width:650px;">
+          Pesquisa-ação com grupos de terceira idade nos espaços públicos de Sobral-CE — articulando mestrado e extensão universitária na construção de memória coletiva.
+        </p>
+        <div class="cover-meta">
+          <div class="cover-meta-item">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span>Pesquisa de Mestrado · Arquitetura & Urbanismo</span>
+          </div>
+          <div class="cover-meta-item">
+            <i class="fa-solid fa-university"></i>
+            <span>Faculdade Luciano Feijão — FLF · Sobral, CE</span>
+          </div>
+          <div class="cover-meta-item">
+            <i class="fa-solid fa-calendar-alt"></i>
+            <span>2025–2026</span>
+          </div>
+        </div>
+        <div class="pill-row">
+          <span class="pill gold">Pesquisa-Ação</span>
+          <span class="pill teal">Extensão</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:2rem;">
+        <div class="photo-frame" style="height:650px;">
+          <img src="primeirocontato.jpeg" alt="1º Contato CRAS Mimi Marinho">
+        </div>
+        <div class="glass-card-sm">
+          <div style="display:flex;align-items:center;gap:1rem;">
+            <div style="display:flex;gap:0.6rem;">
+              <div style="width:14px;height:14px;border-radius:50%;background:var(--b1);"></div>
+              <div style="width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,0.3);"></div>
+            </div>
+            <span class="caption">Bloco 1 · Mestrado &nbsp;|&nbsp; Bloco 2 · Extensão · FLF</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========== SLIDE 2: METODOLOGIA ========== -->
+  <div class="slide" id="s2">
+    <div class="block-badge b1">
+      <i class="fa-solid fa-circle-dot" style="margin-right:0.5rem;"></i>
+      Bloco 1 · Mestrado
+    </div>
+    <div class="two-col img-right" style="margin-top:2rem;">
+      <div class="text-col">
+        <div>
+          <div class="eyebrow">Desenho Metodológico</div>
+          <h2 class="slide-title">Pesquisa-Ação <em>Participativa</em></h2>
+          <div class="accent-line"></div>
+        </div>
+        <div class="step-list">
+          <div class="step-item">
+            <div class="step-num">01</div>
+            <div class="glass-card-sm" style="flex:1;">
+              <div class="icon-feature" style="margin-bottom:0;">
+                <i class="fa-solid fa-handshake fa-icon"></i>
+                <div>
+                  <div style="font-size:1.2rem;font-weight:600;">Imersão nos grupos</div>
+                  <p class="body-text">Inserção em grupos de convivência da terceira idade já estruturados.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">02</div>
+            <div class="glass-card-sm" style="flex:1;">
+              <div class="icon-feature" style="margin-bottom:0;">
+                <i class="fa-solid fa-microphone fa-icon"></i>
+                <div>
+                  <div style="font-size:1.2rem;font-weight:600;">Narrativas & Depoimentos</div>
+                  <p class="body-text">Coleta qualitativa de memórias por meio de entrevistas e rodas de conversa.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">03</div>
+            <div class="glass-card-sm" style="flex:1;">
+              <div class="icon-feature" style="margin-bottom:0;">
+                <i class="fa-solid fa-map-location-dot fa-icon"></i>
+                <div>
+                  <div style="font-size:1.2rem;font-weight:600;">Cartografia Afetiva</div>
+                  <p class="body-text">Mapeamento dos espaços evocados, conectando narrativas a territórios.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="img-col">
+        <div class="glass-card" style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+          <div class="eyebrow" style="color:var(--b1);margin-bottom:1.5rem;">
+            <i class="fa-solid fa-map-pin" style="margin-right:0.5rem;"></i>
+            Campo de Pesquisa
+          </div>
+          <p class="body-text">Sobral é a 2ª maior cidade do Ceará, com centro histórico tombado pelo IPHAN. Sua paisagem urbana mescla patrimônio colonial e memória viva.</p>
+          <div class="accent-line" style="margin-top:2rem;"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;margin-top:2rem;">
+            <div style="text-align:center;">
+              <div class="big-number">3</div>
+              <div class="caption">Grupos de<br>Terceira Idade</div>
+            </div>
+            <div style="text-align:center;">
+              <div class="big-number">+60</div>
+              <div class="caption">Anos — perfil<br>dos participantes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 3: 1º CONTATO — CRAS MIMI MARINHO ========== -->
+  <div class="slide" id="s3">
+    <div class="block-badge b1">
+      <i class="fa-solid fa-circle-dot" style="margin-right:0.5rem;"></i>
+      Bloco 1 · Mestrado
+    </div>
+    <div class="two-col" style="margin-top:2rem;">
+      <div class="img-col">
+        <div class="photo-frame" style="height:750px;">
+          <img src="primeirocontato.jpeg" alt="1º Contato CRAS Mimi Marinho">
+        </div>
+        <div class="glass-card-sm">
+          <i class="fa-solid fa-location-dot" style="color:var(--b1);margin-right:0.6rem;"></i>
+          <span class="caption">CRAS Mimi Marinho · Sobral, CE</span>
+        </div>
+      </div>
+      <div class="text-col">
+        <div>
+          <div class="eyebrow" style="color:var(--b1);">1º Contato · Mestrado</div>
+          <h2 class="slide-title">CRAS <em>Mimi Marinho</em></h2>
+          <div class="accent-line"></div>
+        </div>
+        <p class="body-text">Espaço de encontros semanais para atividades coletivas e socioassistenciais.</p>
+        <div style="display:flex;flex-direction:column;gap:1.5rem;margin-top:1.5rem;">
+          <div class="icon-feature">
+            <i class="fa-solid fa-users fa-icon"></i>
+            <span class="body-text">Grupo consolidado com participação ativa e regular.</span>
+          </div>
+          <div class="icon-feature">
+            <i class="fa-solid fa-comments fa-icon"></i>
+            <span class="body-text">Abertura de diálogos sobre memórias e afetos urbanos.</span>
+          </div>
+          <div class="icon-feature">
+            <i class="fa-solid fa-circle-check fa-icon"></i>
+            <span class="body-text">Registros de narrativas espontâneas sobre a cidade.</span>
+          </div>
+        </div>
+        <div class="quote-card" style="margin-top:2rem;">
+          <i class="fa-solid fa-quote-left" style="color:var(--b1);font-size:1.5rem;margin-bottom:1rem;display:block;"></i>
+          <p class="body-text" style="font-style:italic;">Integração e roda de conversa sobre os lugares mais marcantes de Sobral.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 4: 2º CONTATO — CSF DOM EXPEDITO ========== -->
+  <div class="slide" id="s4">
+    <div class="block-badge b1">
+      <i class="fa-solid fa-circle-dot" style="margin-right:0.5rem;"></i>
+      Bloco 1 · Mestrado
+    </div>
+    <div class="two-col img-right" style="margin-top:2rem;">
+      <div class="text-col">
+        <div>
+          <div class="eyebrow" style="color:var(--b1);">2º Contato · Mestrado</div>
+          <h2 class="slide-title">CSF <em>Dom Expedito</em></h2>
+          <div class="accent-line"></div>
+        </div>
+        <p class="body-text">Grupo inserido na estratégia de saúde integral da atenção primária.</p>
+        <div style="display:flex;flex-direction:column;gap:1.5rem;margin-top:1.5rem;">
+          <div class="icon-feature">
+            <i class="fa-solid fa-heartbeat fa-icon"></i>
+            <span class="body-text">Participantes com forte e longa vinculação ao bairro.</span>
+          </div>
+          <div class="icon-feature">
+            <i class="fa-solid fa-comments fa-icon"></i>
+            <span class="body-text">Memórias sobre espaços públicos em constante transformação.</span>
+          </div>
+          <div class="icon-feature">
+            <i class="fa-solid fa-map fa-icon"></i>
+            <span class="body-text">Mercado, praças e igrejas como âncoras da memória afetiva.</span>
+          </div>
+        </div>
+        <div class="glass-card-sm" style="margin-top:2rem;">
+          <div class="pill-row">
+            <span class="pill gold"><i class="fa-solid fa-stethoscope" style="margin-right:0.4rem;"></i>Saúde Integral</span>
+          </div>
+        </div>
+      </div>
+      <div class="img-col">
+        <div class="photo-frame" style="height:750px;">
+          <img src="segundocontato.jpeg" alt="2º Contato CSF Dom Expedito">
+        </div>
+        <div class="glass-card-sm">
+          <i class="fa-solid fa-location-dot" style="color:var(--b1);margin-right:0.6rem;"></i>
+          <span class="caption">CSF Dom Expedito · Sobral, CE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 5: 3º CONTATO — PM VIDA SAUDÁVEL ========== -->
+  <div class="slide" id="s5">
+    <div class="block-badge b1">
+      <i class="fa-solid fa-circle-dot" style="margin-right:0.5rem;"></i>
+      Bloco 1 · Mestrado
+    </div>
+    <div style="max-width:1500px;width:100%;display:flex;flex-direction:column;gap:3rem;">
+      <div>
+        <div class="eyebrow" style="color:var(--b1);">3º Contato · Mestrado</div>
+        <h2 class="slide-title">Projeto <em>Vida Saudável e Segura</em> · PM-CE</h2>
+        <div class="accent-line"></div>
+      </div>
+      <div class="two-col" style="grid-template-columns: 1fr 1fr;">
+        <div class="glass-card">
+          <i class="fa-solid fa-shield-halved" style="color:var(--b1);font-size:2.2rem;margin-bottom:1.2rem;"></i>
+          <div class="eyebrow" style="color:var(--b1);">O Projeto</div>
+          <p class="body-text">Iniciativa que promove saúde, cidadania e segurança comunitária para a terceira idade.</p>
+          <div class="accent-line" style="margin-top:2rem;"></div>
+          <div class="icon-feature" style="margin-top:1.5rem;">
+            <i class="fa-solid fa-people-group fa-icon"></i>
+            <span class="body-text">Forte coesão grupal e participação comunitária ativa.</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:2rem;">
+          <div class="glass-card">
+            <i class="fa-solid fa-magnifying-glass fa-icon" style="color:var(--b1);font-size:1.8rem;margin-bottom:1rem;"></i>
+            <div class="eyebrow" style="color:var(--b1);">Achados</div>
+            <div class="icon-feature">
+              <i class="fa-solid fa-route fa-icon"></i>
+              <span class="body-text">Memórias associadas a percursos cotidianos e segurança.</span>
+            </div>
+            <div class="icon-feature">
+              <i class="fa-solid fa-city fa-icon"></i>
+              <span class="body-text">Tensões entre desenvolvimento e identidade territorial.</span>
+            </div>
+          </div>
+          <div class="quote-card">
+            <p class="body-text" style="font-style:italic;">Camadas de memória coletiva em uma cidade em transformação.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 6: SÍNTESE BLOCO 1 ========== -->
+  <div class="slide" id="s6">
+    <div class="block-badge b1">
+      <i class="fa-solid fa-circle-dot" style="margin-right:0.5rem;"></i>
+      Bloco 1 · Síntese
+    </div>
+    <div style="max-width:1500px;width:100%;display:flex;flex-direction:column;gap:3rem;">
+      <div style="text-align:center;">
+        <div class="eyebrow">Resultados Parciais</div>
+        <h2 class="slide-title"><em>O que os idosos</em> nos contaram</h2>
+        <div class="accent-line" style="margin: 1.2rem auto;"></div>
+      </div>
+      <div class="three-col">
+        <div class="glass-card" style="text-align:center;">
+          <div class="big-number">3</div>
+          <div class="caption" style="margin-top:1rem;">Grupos de convivência<br>acessados em Sobral</div>
+        </div>
+        <div class="glass-card">
+          <i class="fa-solid fa-map-location-dot" style="color:var(--b1);font-size:2.2rem;margin-bottom:1.2rem;"></i>
+          <div class="eyebrow" style="color:var(--b1);">Espaços Evocados</div>
+          <p class="body-text">Praças, igrejas, mercados e as margens do Rio Acaraú.</p>
+        </div>
+        <div class="glass-card">
+          <i class="fa-solid fa-lightbulb" style="color:var(--b1);font-size:2.2rem;margin-bottom:1.2rem;"></i>
+          <div class="eyebrow" style="color:var(--b1);">Tensão Central</div>
+          <p class="body-text">O espaço muda fisicamente, mas a memória persiste nos corpos e narrativas.</p>
+        </div>
+      </div>
+      <div class="glass-card" style="display:flex;align-items:center;gap:4rem;">
+        <div>
+          <div class="eyebrow" style="color:var(--b1);">Próximos Passos</div>
+          <p class="body-text">Aprofundamento qualitativo, cartografia histórica e publicações acadêmicas.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 7: INTRO EXTENSÃO ========== -->
+  <div class="slide" id="s7">
+    <div class="block-badge b2">
+      <i class="fa-solid fa-circle-dot" style="margin-right:0.5rem;"></i>
+      Bloco 2 · Extensão · FLF
+    </div>
+    <div class="two-col" style="margin-top:2rem;">
+      <div class="text-col">
+        <div>
+          <div class="eyebrow" style="color:var(--b2);">Extensão Interdisciplinar</div>
+          <h2 class="slide-title">Arquitetura & Urbanismo<br><em>na Comunidade</em></h2>
+          <div class="accent-line b2"></div>
+        </div>
+        <p class="body-text">Articulação entre a pesquisa acadêmica e a imersão territorial com estudantes da FLF.</p>
+        <div style="display:flex;flex-direction:column;gap:1.5rem;margin-top:2rem;">
+          <div class="icon-feature">
+            <i class="fa-solid fa-link fa-icon b2"></i>
+            <span class="body-text"><strong>Articulação:</strong> Mobilização dos grupos de memória em Sobral.</span>
+          </div>
+          <div class="icon-feature">
+            <i class="fa-solid fa-people-arrows fa-icon b2"></i>
+            <span class="body-text"><strong>Método:</strong> Visitas de campo e mediação comunitária ativa.</span>
+          </div>
+          <div class="icon-feature">
+            <i class="fa-solid fa-globe fa-icon b2"></i>
+            <span class="body-text"><strong>Produto:</strong> Site educativo "Sobral — Lugares de Memória".</span>
+          </div>
+        </div>
+      </div>
+      <div class="img-col">
+        <div class="glass-card" style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+          <div class="eyebrow" style="color:var(--b2);margin-bottom:2rem;">
+            <i class="fa-solid fa-sitemap" style="margin-right:0.5rem;"></i>
+            Estrutura da Extensão
+          </div>
+          <div class="step-list">
+            <div class="step-item">
+              <div class="step-num b2">01</div>
+              <div><div style="font-size:1.3rem;font-weight:600;">Mapeamento Territorial</div></div>
+            </div>
+            <div class="step-item">
+              <div class="step-num b2">02</div>
+              <div><div style="font-size:1.3rem;font-weight:600;">Escuta Ativa</div></div>
+            </div>
+            <div class="step-item">
+              <div class="step-num b2">03</div>
+              <div><div style="font-size:1.3rem;font-weight:600;">Devolutiva Digital</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 8: CONTATO EXTENSÃO — ASSOC. PE. OSVALDO ========== -->
+  <div class="slide" id="s8">
+    <div class="block-badge b2">
+      <i class="fa-solid fa-circle-dot" style="margin-right:0.5rem;"></i>
+      Bloco 2 · Extensão · FLF
+    </div>
+    <div class="two-col" style="margin-top:2rem;">
+      <div class="img-col" style="gap:2rem;">
+        <div class="photo-frame" style="height:350px;">
+          <img src="extensão1.jpeg" alt="Associação Comunitária Padre Osvaldo Chaves">
+        </div>
+        <div class="photo-frame" style="height:350px;">
+          <img src="quartocontato.jpeg" alt="Contato com moradores">
+        </div>
+      </div>
+      <div class="text-col">
+        <div>
+          <div class="eyebrow" style="color:var(--b2);">1º Contato · Extensão</div>
+          <h2 class="slide-title">Associação Comunitária<br><em>Padre Osvaldo Chaves</em></h2>
+          <div class="accent-line b2"></div>
+        </div>
+        <p class="body-text">Organização territorial com murais que celebram a cultura e identidade local.</p>
+        <div style="display:flex;flex-direction:column;gap:1.5rem;margin-top:1.5rem;">
+          <div class="icon-feature">
+            <i class="fa-solid fa-paint-brush fa-icon b2"></i>
+            <span class="body-text">Murais narram visualmente o cotidiano do bairro.</span>
+          </div>
+          <div class="icon-feature">
+            <i class="fa-solid fa-door-open fa-icon b2"></i>
+            <span class="body-text">Diálogo direto com moradores de longa data.</span>
+          </div>
+          <div class="icon-feature">
+            <i class="fa-solid fa-camera-retro fa-icon b2"></i>
+            <span class="body-text">Acervo fotográfico integrado ao patrimônio digital.</span>
+          </div>
+        </div>
+        <div class="quote-card b2" style="margin-top:2rem;">
+          <p class="body-text" style="font-style:italic;">A sede como suporte físico da memória visual sobralense.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 9: O SITE ========== -->
+  <div class="slide" id="s9">
+    <div class="block-badge b2">
+      <i class="fa-solid fa-circle-dot" style="margin-right:0.5rem;"></i>
+      Bloco 2 · Produto Digital
+    </div>
+    <div class="two-col img-right" style="margin-top:2rem;">
+      <div class="text-col">
+        <div>
+          <div class="eyebrow" style="color:var(--b2);">Devolutiva Comunitária</div>
+          <h2 class="slide-title">Sobral —<br><em>Lugares de Memória</em></h2>
+          <div class="accent-line b2"></div>
+        </div>
+        <p class="body-text">Plataforma digital consolidando as memórias coletadas em campo.</p>
+        <div style="display:flex;flex-direction:column;gap:1.5rem;margin-top:2rem;">
+          <div class="icon-feature">
+            <i class="fa-solid fa-map-marked-alt fa-icon b2"></i>
+            <span class="body-text">8 espaços catalogados com fotos e depoimentos.</span>
+          </div>
+          <div class="icon-feature">
+            <i class="fa-solid fa-image fa-icon b2"></i>
+            <span class="body-text">Acervo histórico para ativação de memórias.</span>
+          </div>
+          <div class="icon-feature">
+            <i class="fa-solid fa-code fa-icon b2"></i>
+            <span class="body-text">Site responsivo acessível a toda a comunidade.</span>
+          </div>
+        </div>
+        <div class="glass-card-sm" style="margin-top:2rem;">
+          <i class="fa-solid fa-link" style="color:var(--b2);margin-right:0.8rem;"></i>
+          <span style="font-size:1.2rem;opacity:0.8;">luisaugustomp.github.io/sobral-memoria</span>
+        </div>
+      </div>
+      <div class="img-col">
+        <div class="site-preview">
+          <div class="site-preview-bar">
+            <div class="site-preview-dot" style="background:#ff6058;"></div>
+            <div class="site-preview-dot" style="background:#ffbd2e;"></div>
+            <div class="site-preview-dot" style="background:#28ca41;"></div>
+            <span class="site-preview-url">luisaugustomp.github.io/sobral-memoria</span>
+          </div>
+          <div class="site-preview-content">
+            <div class="site-thumb"><img src="https://luisaugustomp.github.io/sobral-memoria/assets/pracaabrigo.png" alt="Praça do Abrigo"></div>
+            <div class="site-thumb"><img src="https://luisaugustomp.github.io/sobral-memoria/assets/placeholder_03_teatro.png" alt="Teatro São João"></div>
+            <div class="site-thumb"><img src="https://luisaugustomp.github.io/sobral-memoria/assets/patrocinio_antigo.png" alt="Praça Patrocínio"></div>
+            <div class="site-thumb"><img src="https://luisaugustomp.github.io/sobral-memoria/assets/placeholder_02_praca_se.png" alt="Praça da Sé"></div>
+            <div class="site-thumb"><img src="https://luisaugustomp.github.io/sobral-memoria/assets/arco_antigo.png" alt="Arco"></div>
+            <div class="site-thumb"><img src="https://luisaugustomp.github.io/sobral-memoria/assets/beco.png" alt="Beco do Cotovelo"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /slideshow -->
+
+<!-- CONTROLS -->
+<div id="controls">
+  <button onclick="changeSlide(-1)" title="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+  <button onclick="changeSlide(1)" title="Próximo"><i class="fa-solid fa-chevron-right"></i></button>
+</div>
+
+<script>
+// === XMB CANVAS BACKGROUND ===
+(function(){
+  const canvas = document.getElementById('xmb-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+  
+  function resize(){
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  
+  class Particle {
+    constructor(){
+      this.reset(true);
+    }
+    reset(init){
+      this.x = Math.random() * W;
+      this.y = init ? Math.random() * H : H + 20;
+      this.r = Math.random() * 2 + 0.5;
+      this.speed = Math.random() * 0.2 + 0.05;
+      this.angle = Math.random() * Math.PI * 2;
+      this.drift = (Math.random()-0.5) * 0.003;
+      this.alpha = Math.random() * 0.5 + 0.1;
+    }
+    update(){
+      this.y -= this.speed;
+      this.x += Math.sin(this.angle) * 0.2;
+      this.angle += this.drift;
+      if(this.y < -10) this.reset(false);
+    }
+    draw(){
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(201,169,110,${this.alpha})`;
+      ctx.fill();
+    }
+  }
+  
+  for(let i=0; i<150; i++) particles.push(new Particle());
+  
+  // Wave lines
+  let waveT = 0;
+  function drawWaves(){
+    const waves = [
+      { y: H*0.35, a: 0.05, color: 'rgba(46,134,171,0.15)', speed: 0.004, amp: H*0.08 },
+      { y: H*0.55, a: 0.04, color: 'rgba(201,169,110,0.12)', speed: 0.003, amp: H*0.07 },
+      { y: H*0.72, a: 0.06, color: 'rgba(77,182,172,0.1)', speed: 0.005, amp: H*0.06 },
+    ];
+    waves.forEach(w=>{
+      ctx.beginPath();
+      ctx.moveTo(0, w.y);
+      for(let x=0; x<=W; x+=4){
+        ctx.lineTo(x, w.y + Math.sin(x*w.a + waveT*w.speed*200)*w.amp);
+      }
+      ctx.strokeStyle = w.color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    });
+    waveT++;
+  }
+  
+  function animate(){
+    ctx.clearRect(0,0,W,H);
+    
+    // Gradient background
+    const grad = ctx.createLinearGradient(0,0,W,H);
+    grad.addColorStop(0,'#0d1b2a');
+    grad.addColorStop(0.5,'#0e1f30');
+    grad.addColorStop(1,'#091520');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,W,H);
+    
+    drawWaves();
+    particles.forEach(p=>{ p.update(); p.draw(); });
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+
+// === SLIDESHOW LOGIC ===
+const slides = document.querySelectorAll('.slide');
+let current = 0;
+const total = slides.length;
+
+function updateUI(){
+  slides.forEach((s,i) => s.classList.toggle('active', i===current));
+}
+
+function changeSlide(dir){
+  current = Math.max(0, Math.min(total-1, current+dir));
+  updateUI();
+}
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' ') changeSlide(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') changeSlide(-1);
+  if(e.key==='Home') { current=0; updateUI(); }
+  if(e.key==='End') { current=total-1; updateUI(); }
+});
+
+updateUI();
+</script>
+</body>
+</html>
